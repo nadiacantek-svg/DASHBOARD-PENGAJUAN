@@ -45,7 +45,7 @@ const DashboardPage = () => {
     const fetchStats = async () => {
       const token = localStorage.getItem('admin_token');
       try {
-        const res = await fetch(`${API_URL}/api/admin/stats`, {
+        const res = await fetch(`${API_URL}/api/admin/pengajuan/stats`, {
           headers: {
             'Accept': 'application/json',
             'Authorization': `Bearer ${token}`
@@ -77,6 +77,12 @@ const DashboardPage = () => {
 
           if (data.activities && data.activities.length > 0) {
             setActivities(data.activities);
+            const newNotifs = data.activities.map((act, index) => ({
+              id: index + 1,
+              text: `${act.user} ${act.action}`,
+              read: false
+            }));
+            setNotifications(newNotifs);
           }
         }
       } catch (e) {
