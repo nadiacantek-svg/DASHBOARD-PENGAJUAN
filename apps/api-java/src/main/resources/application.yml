@@ -1,5 +1,3 @@
-winget install PostgreSQL.PostgreSQL
-winget install PostgreSQL.PostgreSQL.16
 spring:
   application:
     name: api-java

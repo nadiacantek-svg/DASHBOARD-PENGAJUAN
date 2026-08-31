@@ -24,7 +24,8 @@ const KotakMasukPage = () => {
       const res = await fetch(url, {
         headers: {
           'Accept': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'bypass-tunnel-reminder': 'true'
         }
       });
       if (res.ok) {
@@ -56,7 +57,8 @@ const KotakMasukPage = () => {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'bypass-tunnel-reminder': 'true'
         },
         body: JSON.stringify({
           status: newStatus,

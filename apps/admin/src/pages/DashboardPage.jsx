@@ -48,7 +48,8 @@ const DashboardPage = () => {
         const res = await fetch(`${API_URL}/api/admin/pengajuan/stats`, {
           headers: {
             'Accept': 'application/json',
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${token}`,
+            'bypass-tunnel-reminder': 'true'
           }
         });
         if (res.ok) {

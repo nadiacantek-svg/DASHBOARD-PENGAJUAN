@@ -35,6 +35,7 @@ const LoginPage = () => {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          'bypass-tunnel-reminder': 'true'
         },
         body: JSON.stringify({ username, password }),
       });
@@ -133,6 +134,7 @@ const LoginPage = () => {
             ) : (
               <>
                 <span>Masuk Dashboard</span>
+
                 <span className="material-symbols-outlined">arrow_forward</span>
               </>
             )}
