@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { API_URL } from '../config';
+import { getAdminStats } from '../services/dataService';
 
 const DashboardPage = () => {
   const [stats, setStats] = useState({
@@ -49,14 +50,8 @@ const DashboardPage = () => {
         return;
       }
       try {
-        const res = await fetch(`${API_URL}/api/admin/pengajuan/stats`, {
-          headers: {
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        if (res.ok) {
-          const data = await res.json();
+        const data = await getAdminStats();
+        if (data) {
           setStats({
             total: data.total || 0,
             diproses: data.diproses || 0,
@@ -88,11 +83,9 @@ const DashboardPage = () => {
             }));
             setNotifications(newNotifs);
           }
-        } else {
-          setStats({ total: 7, diproses: 6, selesai: 1, hariIni: 3, perhatian: 6 });
         }
       } catch (e) {
-        setStats({ total: 7, diproses: 6, selesai: 1, hariIni: 3, perhatian: 6 });
+        console.error('Error fetching admin stats:', e);
       }
     };
     fetchStats();

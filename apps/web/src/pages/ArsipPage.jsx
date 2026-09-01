@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { API_URL } from '../config';
+import { getPengajuans } from '../services/dataService';
 
 const ArsipPage = () => {
   const [arsipData, setArsipData] = useState([]);
@@ -9,12 +10,17 @@ const ArsipPage = () => {
   useEffect(() => {
     const fetchArsip = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/pengajuan`, {
-          headers: { 'Accept': 'application/json' }
-        });
-        if (response.ok) {
-          const data = await response.json();
+        const data = await getPengajuans();
+        if (data && data.length > 0) {
           setArsipData(data);
+        } else {
+          const response = await fetch(`${API_URL}/api/pengajuan`, {
+            headers: { 'Accept': 'application/json' }
+          });
+          if (response.ok) {
+            const resJson = await response.json();
+            setArsipData(resJson);
+          }
         }
       } catch (error) {
         console.error('Error fetching arsip', error);

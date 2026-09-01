@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { API_URL } from '../config';
+import { submitPengajuan, trackPengajuan } from '../services/dataService';
 
 const MainContent = ({ onTrackResult }) => {
   const [formData, setFormData] = useState({
@@ -27,22 +28,32 @@ const MainContent = ({ onTrackResult }) => {
         jenis_berkas: formData.jenis_berkas === 'Lain-lain' ? customJenisBerkas : formData.jenis_berkas
       };
       
-      const response = await fetch(`${API_URL}/api/pengajuan`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify(dataToSend)
-      });
-      if (response.ok) {
-        setSubmitSuccess(true);
-        setFormData({ nama: '', nim: '', jenis_berkas: '', keterangan: '' });
-        setCustomJenisBerkas('');
-        setTimeout(() => setSubmitSuccess(false), 5000);
-      }
+      // Try direct Neon connection first
+      await submitPengajuan(dataToSend);
+      setSubmitSuccess(true);
+      setFormData({ nama: '', nim: '', jenis_berkas: '', keterangan: '' });
+      setCustomJenisBerkas('');
+      setTimeout(() => setSubmitSuccess(false), 5000);
     } catch (error) {
-      console.error('Error submitting form', error);
+      console.error('Error submitting form, trying fetch fallback', error);
+      try {
+        const response = await fetch(`${API_URL}/api/pengajuan`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          body: JSON.stringify(formData)
+        });
+        if (response.ok) {
+          setSubmitSuccess(true);
+          setFormData({ nama: '', nim: '', jenis_berkas: '', keterangan: '' });
+          setCustomJenisBerkas('');
+          setTimeout(() => setSubmitSuccess(false), 5000);
+        }
+      } catch (e2) {
+        console.error('Final fallback error:', e2);
+      }
     }
   };
 
@@ -52,15 +63,11 @@ const MainContent = ({ onTrackResult }) => {
     setTrackingResults([]);
     setSelectedResult(null);
     try {
-      const response = await fetch(`${API_URL}/api/pengajuan/${trackingId}`, {
-        headers: { 'Accept': 'application/json' }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        const resultsArray = Array.isArray(data) ? data : [data];
-        setTrackingResults(resultsArray);
-        setSelectedResult(resultsArray[0]);
-        if (onTrackResult) onTrackResult(resultsArray[0]);
+      const results = await trackPengajuan(trackingId);
+      if (results && results.length > 0) {
+        setTrackingResults(results);
+        setSelectedResult(results[0]);
+        if (onTrackResult) onTrackResult(results[0]);
       } else {
         setTrackingError('Berkas tidak ditemukan');
         if (onTrackResult) onTrackResult(null);

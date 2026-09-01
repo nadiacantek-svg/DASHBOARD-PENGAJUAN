@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { API_URL } from '../config';
+import { getAdminPengajuans, updatePengajuanProgress, deletePengajuan } from '../services/dataService';
 
 const KotakMasukPage = () => {
   const [data, setData] = useState([]);
@@ -16,24 +16,6 @@ const KotakMasukPage = () => {
     fetchData();
   }, [search, filterStatus]);
 
-  const fetchFallbackData = () => {
-    const defaultData = [
-      { id: 7, nama: 'Nadia', nim: '12345678', jenis_berkas: 'Surat Pengantar Magang', keterangan: 'Pengajuan online', status: 'Diproses', created_at: new Date().toISOString() },
-      { id: 6, nama: 'NASIA', nim: '12345678910', jenis_berkas: 'Izin Penelitian (Skripsi)', keterangan: '', status: 'Diproses', created_at: new Date().toISOString() },
-      { id: 5, nama: 'Testing Mahasiswa', nim: '999888777', jenis_berkas: 'Legalisir Dokumen', keterangan: 'Uji coba berkas', status: 'Diproses', created_at: new Date().toISOString() },
-      { id: 4, nama: 'Rina Putri', nim: '12345678910', jenis_berkas: 'Izin Penelitian (Skripsi)', keterangan: '', status: 'Diproses', created_at: new Date().toISOString() },
-      { id: 3, nama: 'Ahmad Faiz', nim: '12345678910', jenis_berkas: 'Legalisir Dokumen', keterangan: '', status: 'Selesai', created_at: new Date().toISOString() }
-    ];
-    let filtered = defaultData;
-    if (search) {
-      filtered = filtered.filter(d => d.nama.toLowerCase().includes(search.toLowerCase()) || d.nim.includes(search) || d.jenis_berkas.toLowerCase().includes(search.toLowerCase()));
-    }
-    if (filterStatus) {
-      filtered = filtered.filter(d => d.status === filterStatus);
-    }
-    setData(filtered);
-  };
-
   const fetchData = async () => {
     setLoading(true);
     const token = localStorage.getItem('admin_token');
@@ -42,21 +24,10 @@ const KotakMasukPage = () => {
       return;
     }
     try {
-      let url = `${API_URL}/api/admin/pengajuan?search=${encodeURIComponent(search)}&status=${encodeURIComponent(filterStatus)}`;
-      const res = await fetch(url, {
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      if (res.ok) {
-        const json = await res.json();
-        setData(json.data || json);
-      } else {
-        fetchFallbackData();
-      }
+      const rows = await getAdminPengajuans(search, filterStatus);
+      setData(rows || []);
     } catch (err) {
-      fetchFallbackData();
+      console.error('Error fetching admin pengajuans:', err);
     } finally {
       setLoading(false);
     }
@@ -72,50 +43,29 @@ const KotakMasukPage = () => {
     e.preventDefault();
     if (!selectedItem) return;
     setUpdating(true);
-    const token = localStorage.getItem('admin_token');
 
     try {
-      const res = await fetch(`${API_URL}/api/admin/pengajuan/${selectedItem.id}/progress`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          status: newStatus,
-          catatan_admin: catatan
-        })
-      });
-
-      if (res.ok) {
-        setMessage('Progress berkas berhasil diperbarui!');
-        setSelectedItem(null);
-        fetchData();
-        setTimeout(() => setMessage(''), 4000);
-      }
+      await updatePengajuanProgress(selectedItem.id, newStatus, catatan);
+      setMessage('Status pengajuan berhasil diperbarui');
+      setSelectedItem(null);
+      fetchData();
+      setTimeout(() => setMessage(''), 4000);
     } catch (err) {
-      console.error('Error updating progress', err);
+      console.error('Error updating progress:', err);
     } finally {
       setUpdating(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Yakin ingin menghapus pengajuan ini?')) return;
-    const token = localStorage.getItem('admin_token');
+    if (!window.confirm('Yakin ingin menghapus berkas pengajuan ini?')) return;
     try {
-      const res = await fetch(`${API_URL}/api/admin/pengajuan/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      if (res.ok) {
-        fetchData();
-      }
+      await deletePengajuan(id);
+      setMessage('Berkas pengajuan berhasil dihapus');
+      fetchData();
+      setTimeout(() => setMessage(''), 4000);
     } catch (err) {
-      console.error('Error deleting', err);
+      console.error('Error deleting pengajuan:', err);
     }
   };
 
