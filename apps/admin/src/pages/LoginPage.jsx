@@ -49,7 +49,8 @@ const LoginPage = () => {
         setError(data.message || 'Login gagal. Periksa username dan password.');
       }
     } catch (err) {
-      setError('Gagal terhubung ke backend API (http://localhost:8080). Pastikan API berjalan.');
+      console.error('Login connection error:', err);
+      setError('Gagal terhubung ke database server. Pastikan koneksi internet stabil.');
     } finally {
       setLoading(false);
     }
