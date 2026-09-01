@@ -19,8 +19,7 @@ export const getAdminStats = async () => {
       d.setDate(d.getDate() - i);
       const dayStr = days[d.getDay()];
       const countRes = await sql.query(
-        "SELECT COUNT(*) FROM pengajuans WHERE created_at >= CURRENT_DATE - ($1 || ' days')::INTERVAL AND created_at < CURRENT_DATE - (($1 - 1) || ' days')::INTERVAL",
-        [i]
+        `SELECT COUNT(*) FROM pengajuans WHERE created_at >= CURRENT_DATE - INTERVAL '${i} day' AND created_at < CURRENT_DATE - INTERVAL '${i - 1} day'`
       );
       weekly.push({
         date: dayStr,
