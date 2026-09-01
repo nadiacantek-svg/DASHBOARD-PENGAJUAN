@@ -33,11 +33,7 @@ const LoginPage = () => {
         setError(data.message || 'Login gagal. Periksa username dan password.');
       }
     } catch (err) {
-      if (username === 'admin' && password === 'admin123') {
-        window.location.href = `${ADMIN_URL}/login?token=demo-token&user=${encodeURIComponent(JSON.stringify({ name: 'Administrator', username: 'admin', role: 'admin' }))}`;
-      } else {
-        setError('Terjadi kesalahan koneksi ke server.');
-      }
+      setError('Gagal terhubung ke backend API (http://localhost:8080). Pastikan API aktif.');
     } finally {
       setLoading(false);
     }

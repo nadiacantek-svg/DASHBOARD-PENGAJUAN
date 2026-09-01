@@ -34,8 +34,7 @@ const LoginPage = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'bypass-tunnel-reminder': 'true'
+          'Accept': 'application/json'
         },
         body: JSON.stringify({ username, password }),
       });
@@ -50,14 +49,7 @@ const LoginPage = () => {
         setError(data.message || 'Login gagal. Periksa username dan password.');
       }
     } catch (err) {
-      // Fallback for demo if backend isn't running
-      if (username === 'admin' && password === 'admin123') {
-        localStorage.setItem('admin_token', 'demo-token');
-        localStorage.setItem('admin_user', JSON.stringify({ name: 'Administrator', username: 'admin', role: 'admin' }));
-        navigate('/dashboard');
-      } else {
-        setError('Terjadi kesalahan koneksi ke server.');
-      }
+      setError('Gagal terhubung ke backend API (http://localhost:8080). Pastikan API berjalan.');
     } finally {
       setLoading(false);
     }

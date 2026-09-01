@@ -19,15 +19,24 @@ const KotakMasukPage = () => {
   const fetchData = async () => {
     setLoading(true);
     const token = localStorage.getItem('admin_token');
+    if (!token || token === 'demo-token') {
+      localStorage.removeItem('admin_token');
+      window.location.href = '/login';
+      return;
+    }
     try {
-      let url = `${API_URL}/api/admin/pengajuan?search=${search}&status=${filterStatus}`;
+      let url = `${API_URL}/api/admin/pengajuan?search=${encodeURIComponent(search)}&status=${encodeURIComponent(filterStatus)}`;
       const res = await fetch(url, {
         headers: {
           'Accept': 'application/json',
-          'Authorization': `Bearer ${token}`,
-          'bypass-tunnel-reminder': 'true'
+          'Authorization': `Bearer ${token}`
         }
       });
+      if (res.status === 401 || res.status === 403) {
+        localStorage.removeItem('admin_token');
+        window.location.href = '/login';
+        return;
+      }
       if (res.ok) {
         const json = await res.json();
         setData(json.data || json);
@@ -57,8 +66,7 @@ const KotakMasukPage = () => {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'Authorization': `Bearer ${token}`,
-          'bypass-tunnel-reminder': 'true'
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           status: newStatus,

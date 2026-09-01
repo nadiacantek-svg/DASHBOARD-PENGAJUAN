@@ -17,16 +17,17 @@ public class ApiApplication {
     @Bean
     public CommandLineRunner dataSeeder(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         return args -> {
-            if (userRepository.count() == 0) {
-                User admin = new User();
-                admin.setName("Admin Fakultas");
-                admin.setUsername("admin");
-                admin.setEmail("admin@example.com");
-                admin.setPassword(passwordEncoder.encode("password"));
-                admin.setRole("admin");
-                userRepository.save(admin);
-                System.out.println("Admin user seeded: admin@example.com / password");
-            }
+            User admin = userRepository.findByUsername("admin").orElseGet(() -> {
+                User u = new User();
+                u.setName("Admin Fakultas");
+                u.setUsername("admin");
+                u.setEmail("admin@example.com");
+                u.setRole("admin");
+                return u;
+            });
+            admin.setPassword(passwordEncoder.encode("admin123"));
+            userRepository.save(admin);
+            System.out.println("Admin user ready: username 'admin', password 'admin123'");
         };
     }
 }

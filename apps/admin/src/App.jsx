@@ -9,7 +9,8 @@ import RiwayatPage from './pages/RiwayatPage';
 // Protected Layout wrapper
 const ProtectedLayout = () => {
   const token = localStorage.getItem('admin_token');
-  if (!token) {
+  if (!token || token === 'demo-token') {
+    localStorage.removeItem('admin_token');
     return <Navigate to="/login" replace />;
   }
 

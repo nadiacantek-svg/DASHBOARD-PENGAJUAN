@@ -44,14 +44,23 @@ const DashboardPage = () => {
   useEffect(() => {
     const fetchStats = async () => {
       const token = localStorage.getItem('admin_token');
+      if (!token || token === 'demo-token') {
+        localStorage.removeItem('admin_token');
+        window.location.href = '/login';
+        return;
+      }
       try {
         const res = await fetch(`${API_URL}/api/admin/pengajuan/stats`, {
           headers: {
             'Accept': 'application/json',
-            'Authorization': `Bearer ${token}`,
-            'bypass-tunnel-reminder': 'true'
+            'Authorization': `Bearer ${token}`
           }
         });
+        if (res.status === 401 || res.status === 403) {
+          localStorage.removeItem('admin_token');
+          window.location.href = '/login';
+          return;
+        }
         if (res.ok) {
           const data = await res.json();
           setStats({
@@ -87,7 +96,7 @@ const DashboardPage = () => {
           }
         }
       } catch (e) {
-        console.log('Using default mock layout stats');
+        console.error('Error fetching stats:', e);
       }
     };
     fetchStats();

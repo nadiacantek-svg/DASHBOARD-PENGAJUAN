@@ -11,6 +11,11 @@ const RiwayatPage = () => {
 
   const fetchRiwayat = async () => {
     const token = localStorage.getItem('admin_token');
+    if (!token || token === 'demo-token') {
+      localStorage.removeItem('admin_token');
+      window.location.href = '/login';
+      return;
+    }
     try {
       const res = await fetch(`${API_URL}/api/admin/pengajuan?status=Selesai`, {
         headers: {
@@ -18,6 +23,11 @@ const RiwayatPage = () => {
           'Authorization': `Bearer ${token}`
         }
       });
+      if (res.status === 401 || res.status === 403) {
+        localStorage.removeItem('admin_token');
+        window.location.href = '/login';
+        return;
+      }
       if (res.ok) {
         const json = await res.json();
         setData(json.data || json);
