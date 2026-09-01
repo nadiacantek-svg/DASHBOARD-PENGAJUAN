@@ -64,10 +64,11 @@ const DashboardPage = () => {
             const counts = data.weekly.map(w => w.count);
             const maxCount = Math.max(...counts, 1);
             const trend = data.weekly.map((w, idx) => {
-              const heightPercent = `${Math.round((w.count / maxCount) * 80) + 15}%`;
+              const heightPx = w.count > 0 ? Math.max(32, Math.round((w.count / maxCount) * 160)) : 10;
               return {
                 day: w.date,
-                height: heightPercent,
+                count: w.count,
+                height: `${heightPx}px`,
                 active: idx === data.weekly.length - 1
               };
             });
@@ -231,20 +232,26 @@ const DashboardPage = () => {
             <span className="text-xs font-bold text-secondary bg-surface-container-low px-2 py-1 rounded">Minggu Ini</span>
           </div>
 
-          <div className="h-64 flex items-end justify-between px-md pb-md relative border-b border-outline/10">
+          <div className="h-64 flex items-end justify-between px-md pb-md relative border-b border-outline/10 gap-sm">
             {weeklyTrend.map((item, idx) => (
-              <div key={idx} className="flex flex-col items-center gap-sm flex-1 group">
+              <div key={idx} className="flex flex-col items-center justify-end h-full flex-1 group">
+                {/* Count Badge */}
+                <span className={`text-[11px] font-bold mb-1 transition-all ${item.count > 0 ? 'text-primary font-black scale-110' : 'text-secondary/50'}`}>
+                  {item.count || 0}
+                </span>
                 {/* Bar */}
                 <div
-                  className={`w-12 rounded-t-md transition-all duration-500 cursor-pointer ${
-                    item.active
-                      ? 'bg-primary shadow-[0_0_15px_rgba(128,86,0,0.4)]'
-                      : 'bg-primary-container/30 hover:bg-primary-container/60'
+                  className={`w-full max-w-[40px] rounded-t-lg transition-all duration-500 cursor-pointer ${
+                    item.count > 0
+                      ? 'bg-primary shadow-md hover:opacity-90'
+                      : 'bg-outline/20 hover:bg-outline/30'
                   }`}
-                  style={{ height: item.height }}
+                  style={{ height: item.height || '10px' }}
                 ></div>
                 {/* Day label */}
-                <span className="text-xs font-label-md text-secondary">{item.day}</span>
+                <span className={`text-xs font-label-md mt-2 ${item.active ? 'font-bold text-primary' : 'text-secondary'}`}>
+                  {item.day}
+                </span>
               </div>
             ))}
           </div>
