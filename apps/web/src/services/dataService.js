@@ -31,17 +31,19 @@ export const getPengajuans = async () => {
 
 export const trackPengajuan = async (queryStr) => {
   try {
-    const isNum = !isNaN(queryStr);
+    if (!queryStr || !queryStr.trim()) return [];
+    const trimmed = queryStr.trim();
+    const isNum = !isNaN(trimmed) && !isNaN(parseFloat(trimmed));
     let rows;
     if (isNum) {
       rows = await sql.query(
-        'SELECT * FROM pengajuans WHERE id = $1 OR nim = $2 ORDER BY created_at DESC',
-        [parseInt(queryStr), queryStr]
+        'SELECT * FROM pengajuans WHERE id = $1 OR nim ILIKE $2 OR nama ILIKE $2 ORDER BY created_at DESC',
+        [parseInt(trimmed), `%${trimmed}%`]
       );
     } else {
       rows = await sql.query(
-        'SELECT * FROM pengajuans WHERE nim = $1 ORDER BY created_at DESC',
-        [queryStr]
+        'SELECT * FROM pengajuans WHERE nama ILIKE $1 OR nim ILIKE $1 ORDER BY created_at DESC',
+        [`%${trimmed}%`]
       );
     }
     return rows;

@@ -132,18 +132,18 @@ export default async function handler(req, res) {
     // 4. GET /pengajuan/:idOrNim (Tracking)
     const trackMatch = pathname.match(/^\/pengajuan\/([^\/]+)$/);
     if (trackMatch && req.method === 'GET') {
-      const trackingId = trackMatch[1];
-      const isNum = !isNaN(trackingId);
+      const trackingId = decodeURIComponent(trackMatch[1]).trim();
+      const isNum = !isNaN(trackingId) && !isNaN(parseFloat(trackingId));
       let trackRes;
       if (isNum) {
         trackRes = await p.query(
-          'SELECT * FROM pengajuans WHERE id = $1 OR nim = $2 ORDER BY created_at DESC',
-          [parseInt(trackingId), trackingId]
+          'SELECT * FROM pengajuans WHERE id = $1 OR nim ILIKE $2 OR nama ILIKE $2 ORDER BY created_at DESC',
+          [parseInt(trackingId), `%${trackingId}%`]
         );
       } else {
         trackRes = await p.query(
-          'SELECT * FROM pengajuans WHERE nim = $1 ORDER BY created_at DESC',
-          [trackingId]
+          'SELECT * FROM pengajuans WHERE nama ILIKE $1 OR nim ILIKE $1 ORDER BY created_at DESC',
+          [`%${trackingId}%`]
         );
       }
       if (trackRes.rows.length > 0) {
